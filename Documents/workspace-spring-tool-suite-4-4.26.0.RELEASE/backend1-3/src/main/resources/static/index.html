@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<title>Quản lý sách</title>
+ 
+<style>
+	html, body {
+	  height: 100%;
+	}
+	body {
+	  margin: 0;
+	  font-family: Arial;
+	  background: #020008;
+	  min-height: 100vh;
+	  position: relative;
+	  overflow-x: hidden;
+	}
+ 
+	.main {
+	  position: relative;
+	  z-index: 1;
+	  padding: 20px;
+	}
+ 
+h1 {
+  color: white;
+  text-shadow: 0 2px 8px black;
+  margin: 0;
+}
+ 
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+}
+ 
+.card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  overflow: hidden;
+  color: white;
+}
+ 
+.card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+}
+ 
+.card-body {
+  padding: 10px;
+}
+ 
+.card-actions button {
+  margin-right: 5px;
+}
+ 
+.stats {
+  color: white;
+  margin: 10px 0;
+}
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  justify-content: center;
+  align-items: center;
+}
+ 
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 300px;
+}
+ 
+.modal input {
+  display: block;
+  width: 100%;
+  margin: 10px 0;
+  padding: 8px;
+}
+#borrowSection {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+ 
+  #borrowSection thead {
+    background: linear-gradient(45deg, #4facfe, #00f2fe);
+    color: white;
+  }
+ 
+  #borrowSection th,
+  #borrowSection td {
+    padding: 10px;
+    text-align: center;
+  }
+ 
+  #borrowSection tbody tr {
+    background: white;
+    transition: 0.2s;
+  }
+ 
+  #borrowSection tbody tr:nth-child(even) {
+    background: #f9fafb;
+  }
+ 
+  #borrowSection tbody tr:hover {
+    background: #e0f2fe;
+    transform: scale(1.01);
+  }
+ 
+  #borrowSection td {
+    border-bottom: 1px solid #eee;
+  }
+ 
+  .badge {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    color: white;
+  }
+ 
+  .badge-borrow {
+    background: #f59e0b;
+  }
+ 
+  .badge-return {
+    background: #10b981;
+  }
+ 
+  input {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white;
+    padding: 10px 12px;
+    border-radius: 10px;
+    outline: none;
+    margin: 5px;
+  }
+  input::placeholder { color: rgba(255,255,255,0.35); }
+  
+  input:focus {
+    border-color: #4facfe;
+    box-shadow: 0 0 8px rgba(79,172,254,0.5);
+  }
+ 
+  button {
+    background: rgba(139,92,246,0.35);
+    border: 1px solid rgba(139,92,246,0.6);
+    border-radius: 10px;
+    color: white;
+    padding: 10px 14px;
+    cursor: pointer;
+    margin: 5px;
+    transition: 0.2s;
+  }
+ 
+  button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 15px rgba(139,92,246,0.4);
+  }
+ 
+  button:active {
+    transform: scale(0.95);
+  }
+  
+  .container {
+    background: rgba(255,255,255,0.1);
+    padding: 10px;
+    border-radius: 12px;
+  }
+  
+  .top-box {
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+ 
+	<!-- Trang đăng nhập -->
+	<div id="loginPage" style="
+	  position: fixed; inset: 0; z-index: 999;
+	  display: flex; align-items: center; justify-content: center;
+	  background: #020008;
+	">
+	  <div style="
+	    background: rgba(255,255,255,0.05);
+	    border: 1px solid rgba(255,255,255,0.1);
+	    border-radius: 20px;
+	    padding: 40px;
+	    width: 320px;
+	    text-align: center;
+	  ">
+	    <h2 style="color:white;margin:0 0 8px;letter-spacing:1px;">✦ Đăng nhập</h2>
+	    <p style="color:rgba(255,255,255,0.4);font-size:13px;margin:0 0 24px;">Quản lý sách</p>
+ 
+	    <input id="loginUser" placeholder="Tên đăng nhập" style="
+	      width:100%;box-sizing:border-box;margin-bottom:12px;
+	      background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+	      color:white;padding:12px;border-radius:10px;outline:none;font-size:14px;
+	    ">
+	    <input id="loginPass" type="password" placeholder="Mật khẩu" style="
+	      width:100%;box-sizing:border-box;margin-bottom:20px;
+	      background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+	      color:white;padding:12px;border-radius:10px;outline:none;font-size:14px;
+	    ">
+	    <div id="loginError" style="color:#f87171;font-size:13px;margin-bottom:12px;display:none;">
+	      Sai tài khoản hoặc mật khẩu!
+	    </div>
+	    <button onclick="handleLogin()" style="
+	      width:100%;padding:12px;border:none;border-radius:10px;
+	      background:linear-gradient(135deg,rgba(139,92,246,0.8),rgba(59,130,246,0.8));
+	      color:white;font-size:15px;cursor:pointer;
+	    ">Đăng nhập</button>
+	  </div>
+	</div>
+ 
+	<div style="position:fixed;width:350px;height:350px;border-radius:50%;background:#4c1d95;filter:blur(80px);opacity:0.45;top:-120px;right:-80px;pointer-events:none;z-index:0;"></div>
+	<div style="position:fixed;width:280px;height:280px;border-radius:50%;background:#1e3a5f;filter:blur(80px);opacity:0.5;bottom:-80px;left:-60px;pointer-events:none;z-index:0;"></div>
+	<canvas id="stars" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></canvas>
+ 
+	<div class="main">
+ 
+		<!-- Nút đăng xuất -->
+		<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+		  <h1>Quản lý sách</h1>
+		  <button onclick="handleLogout()"
+		    style="background:rgba(239,68,68,0.35);border:1px solid rgba(239,68,68,0.5);">
+		    Đăng xuất
+		  </button>
+		</div>
+ 
+		<button onclick="toggleBorrowTable()">Danh sách người mượn</button>
+		<div style="
+		  background: rgba(255,255,255,0.2);
+		  backdrop-filter: blur(10px);
+		  padding: 15px;
+		  border-radius: 16px;
+		  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+		  margin-top:10px;
+		">
+		  <input type="hidden" id="bookId">
+		  <input type="hidden" id="image">
+		  <input id="title" placeholder="Tên sách">
+		  <input id="author" placeholder="Tác giả">
+		  <label style="cursor:pointer; padding:10px 14px; border:none; border-radius:10px; background:linear-gradient(45deg,#4facfe,#00f2fe); color:white; margin:5px; display:inline-block;">
+		    Chọn ảnh
+		    <input type="file" id="imageFile" accept="image/*" onchange="handleImageUpload(event)" style="display:none">
+		  </label>
+		  <img id="preview" style="width:80px; height:80px; object-fit:cover; border-radius:8px; display:none; margin:5px; vertical-align:middle;">
+		  <button id="saveBtn" onclick="saveBook()">Thêm</button>
+		</div>
+		<div>
+		  <input id="keyword" placeholder="Tìm kiếm..." oninput="searchRealtime()">
+		</div>
+ 
+		<div class="stats">
+		  Tổng số sách: <span id="totalBooks">0</span>
+		</div>
+		<h2 style="color:white; text-shadow:0 2px 8px black;">
+		  Danh sách người mượn
+		</h2>
+		<div style="
+		  background: rgba(255,255,255,0.05);
+		  padding: 15px;
+		  border-radius: 16px;
+		  box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+		  margin-top:10px;
+		">
+		  <table id="borrowSection" style="display:none; width:100%;">
+		    <thead>
+		      <tr>
+		        <th>STT</th>
+		        <th>Tên sách</th>
+		        <th>Tên</th>
+		        <th>SĐT</th>
+		        <th>Ngày mượn</th>
+		        <th>Ngày trả</th>
+		      </tr>
+		    </thead>
+		    <tbody id="borrowTable"></tbody>
+		  </table>
+		</div>
+ 
+		<div id="bookGrid" class="grid"></div>
+ 
+		<div id="borrowModal" class="modal">
+		  <div class="modal-content" style="
+		    background:#1a1a2e;
+		    border:1px solid rgba(255,255,255,0.1);
+		    border-radius:16px;
+		    width:340px;
+		  ">
+		    <h3 style="color:white;margin:0 0 16px;">Mượn sách</h3>
+
+		    <input id="borrowName" placeholder="Tên" style="
+		      width:100%;box-sizing:border-box;margin-bottom:10px;
+		      background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+		      color:white;padding:12px;border-radius:10px;outline:none;
+		    ">
+		    <input id="borrowPhone" placeholder="SĐT" style="
+		      width:100%;box-sizing:border-box;margin-bottom:10px;
+		      background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+		      color:white;padding:12px;border-radius:10px;outline:none;
+		    ">
+		    <input id="borrowDate" type="date" style="
+		      width:100%;box-sizing:border-box;margin-bottom:10px;
+		      background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+		      color:white;padding:12px;border-radius:10px;outline:none;
+		    ">
+		    <input id="returnDate" type="date" style="
+		      width:100%;box-sizing:border-box;margin-bottom:16px;
+		      background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);
+		      color:white;padding:12px;border-radius:10px;outline:none;
+		    ">
+
+		    <div style="display:flex;gap:8px;">
+		      <button onclick="confirmBorrow()" style="flex:1;background:linear-gradient(135deg,rgba(139,92,246,0.8),rgba(59,130,246,0.8));border:none;">Xác nhận</button>
+		      <button onclick="closeModal()" style="flex:1;background:rgba(239,68,68,0.35);border:1px solid rgba(239,68,68,0.5);">Hủy</button>
+		    </div>
+		  </div>
+		</div>
+		<!-- Cập nhật sách -->
+		<div id="editModal" class="modal">
+		  <div class="modal-content" style="background:#1a1a2e;border:1px solid rgba(255,255,255,0.1);border-radius:16px;width:340px;">
+		    <h3 style="color:white;margin:0 0 16px;">Sửa sách</h3>
+
+		    <input id="editId" type="hidden">
+
+		    <input id="editTitle" placeholder="Tên sách" style="width:100%;box-sizing:border-box;margin-bottom:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:white;padding:12px;border-radius:10px;outline:none;">
+
+		    <input id="editAuthor" placeholder="Tác giả" style="width:100%;box-sizing:border-box;margin-bottom:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);color:white;padding:12px;border-radius:10px;outline:none;">
+
+		    <div style="margin-bottom:10px;">
+		      <label style="cursor:pointer;padding:10px 14px;border-radius:10px;background:linear-gradient(45deg,#4facfe,#00f2fe);color:white;display:inline-block;">
+		        Chọn ảnh mới
+		        <input type="file" id="editImageFile" accept="image/*" onchange="handleEditImageUpload(event)" style="display:none">
+		      </label>
+		      <img id="editPreview" style="width:60px;height:60px;object-fit:cover;border-radius:8px;display:none;margin-left:10px;vertical-align:middle;">
+		    </div>
+
+		    <div style="display:flex;gap:8px;margin-top:8px;">
+		      <button onclick="confirmEdit()" style="flex:1;background:linear-gradient(135deg,rgba(139,92,246,0.8),rgba(59,130,246,0.8));border:none;">Lưu</button>
+		      <button onclick="closeEditModal()" style="flex:1;background:rgba(239,68,68,0.35);border:1px solid rgba(239,68,68,0.5);">Hủy</button>
+		    </div>
+		  </div>
+		</div>
+	</div>
+ 
+<script>
+
+	async function handleLogin() {
+	  const username = document.getElementById('loginUser').value;
+	  const password = document.getElementById('loginPass').value;
+ 
+	  if (!username || !password) {
+	    showLoginError();
+	    return;
+	  }
+ 
+	  try {
+	    const res = await fetch('http://localhost:8081/login', {
+	      method: 'POST',
+	      headers: { 'Content-Type': 'application/json' },
+	      body: JSON.stringify({ username, password })
+	    });
+ 
+	    if (res.ok) {
+	      const data = await res.json();
+	      sessionStorage.setItem('token', data.token || 'logged_in');
+	      document.getElementById('loginPage').style.display = 'none';
+	      loadBooks();
+	    } else {
+	      showLoginError();
+	    }
+	  } catch (e) {
+	    showLoginError();
+	  }
+	}
+ 
+	function showLoginError() {
+	  const err = document.getElementById('loginError');
+	  err.style.display = 'block';
+	  setTimeout(() => err.style.display = 'none', 3000);
+	}
+ 
+	function handleLogout() {
+	  sessionStorage.removeItem('token');
+	  document.getElementById('loginPage').style.display = 'flex';
+	}
+ 
+	function checkAuth() {
+	  if (!sessionStorage.getItem('token')) {
+	    document.getElementById('loginPage').style.display = 'flex';
+	    return false;
+	  }
+	  return true;
+	}
+ 
+	document.addEventListener('DOMContentLoaded', () => {
+	  document.getElementById('loginPass')
+	    .addEventListener('keydown', e => { if (e.key === 'Enter') handleLogin(); });
+	});
+ 
+	// BOOKS
+	const api = "http://localhost:8081/books";
+	let currentBookId = null;
+	let allBooks = [];
+	let borrowedMap = {};
+ 
+	async function loadBorrows() {
+	  const res = await fetch("http://localhost:8081/borrows");
+	  const data = await res.json();
+ 
+	  borrowedMap = {};
+	  data.forEach(b => borrowedMap[b.bookId] = b);
+ 
+	  const table = document.getElementById("borrowTable");
+	  table.innerHTML = "";
+	  data.forEach((b, index) => {
+	    const book = allBooks.find(x => x.id === b.bookId);
+	    table.innerHTML += `
+	      <tr>
+	        <td>${index + 1}</td>
+	        <td>${book ? book.title : ""}</td>
+	        <td>${b.name}</td>
+	        <td>${b.phone}</td>
+	        <td><span class="badge badge-borrow">${b.borrowDate || ""}</span></td>
+	        <td><span class="badge badge-return">${b.returnDate || ""}</span></td>
+	      </tr>
+	    `;
+	  });
+	}
+ 
+	async function loadBooks() {
+	  if (!checkAuth()) return;
+	  const res = await fetch(api);
+	  allBooks = await res.json();
+	  await loadBorrows();
+	  renderBooks(allBooks);
+	}
+ 
+	function renderBooks(books) {
+	  const grid = document.getElementById("bookGrid");
+	  grid.innerHTML = "";
+ 
+	  window._bookMap = {};
+	  books.forEach(book => {
+	    window._bookMap[book.id] = book;
+	    const isBorrowed = borrowedMap[book.id];
+ 
+	    grid.innerHTML += `
+	      <div class="card">
+	        <img src="${book.image || 'https://picsum.photos/200'}">
+	        <div class="card-body">
+	          <b>${book.title}</b><br>
+	          <small>${book.author}</small><br>
+	          ${isBorrowed
+	            ? `<div style="color:#f87171">Đang mượn bởi: ${isBorrowed.name}</div>`
+	            : `<div style="color:#4ade80">Còn sách</div>`
+	          }
+	          <div class="card-actions">
+	            ${isBorrowed
+	              ? `<button onclick='returnBook(${book.id})'>Trả</button>`
+	              : `<button onclick='openBorrowModal(${book.id})'>Mượn</button>`
+	            }
+	            <button onclick='editBook(${book.id})'>Sửa</button>
+	            <button onclick='deleteBook(${book.id})' style="background:rgba(239,68,68,0.35);border:1px solid rgba(239,68,68,0.5);">Xóa</button>
+	          </div>
+	        </div>
+	      </div>
+	    `;
+	  });
+ 
+	  document.getElementById("totalBooks").innerText = books.length;
+	}
+ 
+	async function saveBook() {
+	  const id = bookId.value;
+	  const book = {
+	    title: title.value,
+	    author: author.value,
+	    image: image.value
+	  };
+ 
+	  if (id) {
+	    await fetch(`${api}/${id}`, {
+	      method: "PUT",
+	      headers: {"Content-Type":"application/json"},
+	      body: JSON.stringify(book)
+	    });
+	  } else {
+	    await fetch(api, {
+	      method: "POST",
+	      headers: {"Content-Type":"application/json"},
+	      body: JSON.stringify(book)
+	    });
+	  }
+ 
+	  clearForm();
+	  loadBooks();
+	}
+ 
+	function editBook(id) {
+	  const book = window._bookMap[id];
+	  document.getElementById('editId').value = id;
+	  document.getElementById('editTitle').value = book.title;
+	  document.getElementById('editAuthor').value = book.author;
+
+	  const preview = document.getElementById('editPreview');
+	  if (book.image) {
+	    preview.src = book.image;
+	    preview.style.display = 'inline-block';
+	  } else {
+	    preview.style.display = 'none';
+	  }
+
+	  window._editCurrentImage = book.image || "";
+
+	  document.getElementById('editModal').style.display = 'flex';
+	}
+
+	function handleEditImageUpload(event) {
+	  const file = event.target.files[0];
+	  if (!file) return;
+
+	  const reader = new FileReader();
+	  reader.onload = function(e) {
+	    window._editCurrentImage = e.target.result;
+	    const preview = document.getElementById('editPreview');
+	    preview.src = e.target.result;
+	    preview.style.display = 'inline-block';
+	  };
+	  reader.readAsDataURL(file);
+	}
+
+	async function confirmEdit() {
+	  const id = document.getElementById('editId').value;
+	  const book = {
+	    title: document.getElementById('editTitle').value,
+	    author: document.getElementById('editAuthor').value,
+	    image: window._editCurrentImage || ""
+	  };
+
+	  await fetch(`${api}/${id}`, {
+	    method: "PUT",
+	    headers: {"Content-Type": "application/json"},
+	    body: JSON.stringify(book)
+	  });
+
+	  closeEditModal();
+	  loadBooks();
+	}
+
+	function closeEditModal() {
+	  document.getElementById('editModal').style.display = 'none';
+	  document.getElementById('editImageFile').value = "";
+	}
+ 
+	async function deleteBook(id) {
+	  await fetch(`${api}/${id}`, {method:"DELETE"});
+	  loadBooks();
+	}
+ 
+	async function returnBook(bookId) {
+	  await fetch(`http://localhost:8081/borrows/${bookId}`, {method:"DELETE"});
+	  loadBooks();
+	}
+ 
+	function searchRealtime() {
+	  const k = keyword.value.toLowerCase();
+	  renderBooks(allBooks.filter(b =>
+	    b.title.toLowerCase().includes(k) ||
+	    b.author.toLowerCase().includes(k)
+	  ));
+	}
+ 
+	function handleImageUpload(event) {
+	  const file = event.target.files[0];
+	  if (!file) return;
+ 
+	  const reader = new FileReader();
+	  reader.onload = function(e) {
+	    const base64 = e.target.result;
+	    document.getElementById('image').value = base64;
+	    const preview = document.getElementById('preview');
+	    preview.src = base64;
+	    preview.style.display = 'inline-block';
+	  };
+	  reader.readAsDataURL(file);
+	}
+ 
+	function previewImage() {
+	  if (image.value) {
+	    preview.src = image.value;
+	    preview.style.display = "block";
+	  } else {
+	    preview.style.display = "none";
+	  }
+	}
+ 
+	function openBorrowModal(bookId) {
+	  currentBookId = bookId;
+	  document.getElementById("borrowModal").style.display = "flex";
+	}
+ 
+	function closeModal() {
+	  document.getElementById("borrowModal").style.display = "none";
+	}
+ 
+	async function confirmBorrow() {
+	  const name = document.getElementById("borrowName").value;
+	  const phone = document.getElementById("borrowPhone").value;
+	  const borrowDateVal = document.getElementById("borrowDate").value;
+	  const returnDateVal = document.getElementById("returnDate").value;
+ 
+	  if (!name || !phone) {
+	    alert("Nhập thiếu thông tin");
+	    return;
+	  }
+ 
+	  const res = await fetch("http://localhost:8081/borrows", {
+	    method: "POST",
+	    headers: {"Content-Type":"application/json"},
+	    body: JSON.stringify({
+	      name,
+	      phone,
+	      borrowDate: borrowDateVal,
+	      returnDate: returnDateVal,
+	      bookId: currentBookId
+	    })
+	  });
+ 
+	  if (!res.ok) {
+	    alert("Đã có người mượn!");
+	    return;
+	  }
+ 
+	  closeModal();
+	  loadBooks();
+	}
+ 
+	function toggleBorrowTable() {
+	  const section = document.getElementById("borrowSection");
+	  section.style.display =
+	    section.style.display === "none" ? "table" : "none";
+	}
+ 
+	function clearForm() {
+	  bookId.value = "";
+	  title.value = "";
+	  author.value = "";
+	  image.value = "";
+	  preview.style.display = "none";
+	  saveBtn.innerText = "Thêm";
+	}
+ 
+	loadBooks();
+</script>
+ 
+<script>
+  const c = document.getElementById('stars');
+  const ctx = c.getContext('2d');
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
+  for (let i = 0; i < 150; i++) {
+    ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.7 + 0.1})`;
+    ctx.beginPath();
+    ctx.arc(Math.random() * c.width, Math.random() * c.height, Math.random() * 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+</script>
+ 
+</body>
+</html>

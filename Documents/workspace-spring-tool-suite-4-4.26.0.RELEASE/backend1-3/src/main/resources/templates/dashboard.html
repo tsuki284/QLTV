@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f7fb;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #222;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+        }
+
+        .stats {
+            font-size: 22px;
+            color: #333;
+        }
+
+        .stats span {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 14px;
+            border-bottom: 1px solid #eee;
+            text-align: left;
+        }
+
+        th {
+            background: #007bff;
+            color: white;
+        }
+
+        tr:hover {
+            background: #f9fbff;
+        }
+
+        .empty {
+            color: #999;
+            font-style: italic;
+            padding: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title">Book Management Dashboard</div>
+
+        <div class="card stats">
+            Tổng số sách: <span th:text="${totalBooks}"></span>
+        </div>
+
+        <div class="card">
+            <h2>Danh sách sách</h2>
+
+            <div th:if="${#lists.isEmpty(books)}" class="empty">
+                Chưa có sách nào trong hệ thống.
+            </div>
+
+            <table th:if="${!#lists.isEmpty(books)}">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Tên sách</th>
+                        <th>Tác giả</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="book : ${books}">
+                        <td th:text="${book.id}"></td>
+                        <td th:text="${book.title}"></td>
+                        <td th:text="${book.author}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
