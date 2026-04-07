@@ -374,7 +374,7 @@ h1 {
  
 	    if (res.ok) {
 	      const data = await res.json();
-	      sessionStorage.setItem('token', data.token || 'logged_in');
+	      localStorage.setItem('token', data.token || 'logged_in');
 	      document.getElementById('loginPage').style.display = 'none';
 	      loadBooks();
 	    } else {
@@ -392,12 +392,12 @@ h1 {
 	}
  
 	function handleLogout() {
-	  sessionStorage.removeItem('token');
+	  localStorage.removeItem('token');
 	  document.getElementById('loginPage').style.display = 'flex';
 	}
  
 	function checkAuth() {
-	  if (!sessionStorage.getItem('token')) {
+	  if (!localStorage.getItem('token')) {
 	    document.getElementById('loginPage').style.display = 'flex';
 	    return false;
 	  }
