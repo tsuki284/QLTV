@@ -441,7 +441,13 @@ h1 {
  
 	async function loadBooks() {
 	  if (!checkAuth()) return;
-	  const res = await fetch(api);
+	  document.getElementById('bookGrid').innerHTML = `
+	    <div style="color:rgba(255,255,255,0.4);text-align:center;padding:40px;grid-column:1/-1;">
+	      Đang tải...
+	    </div>
+	  `;
+
+	  const res = await fetch('/books');
 	  allBooks = await res.json();
 	  await loadBorrows();
 	  renderBooks(allBooks);
@@ -458,7 +464,7 @@ h1 {
  
 	    grid.innerHTML += `
 	      <div class="card">
-	        <img src="${book.image || 'https://picsum.photos/200'}">
+	        <img src="${book.image || 'https://picsum.photos/200'}" loading="lazy">
 	        <div class="card-body">
 	          <b>${book.title}</b><br>
 	          <small>${book.author}</small><br>
@@ -585,17 +591,32 @@ h1 {
 	function handleImageUpload(event) {
 	  const file = event.target.files[0];
 	  if (!file) return;
- 
+
 	  const reader = new FileReader();
 	  reader.onload = function(e) {
-	    const base64 = e.target.result;
-	    document.getElementById('image').value = base64;
-	    const preview = document.getElementById('preview');
-	    preview.src = base64;
-	    preview.style.display = 'inline-block';
+	    const img = new Image();
+	    img.onload = function() {
+	      const canvas = document.createElement('canvas');
+	      const maxSize = 800;
+	      let w = img.width, h = img.height;
+
+	      if (w > maxSize) { h = h * maxSize / w; w = maxSize; }
+	      if (h > maxSize) { w = w * maxSize / h; h = maxSize; }
+
+	      canvas.width = w;
+	      canvas.height = h;
+	      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+
+	      const base64 = canvas.toDataURL('image/jpeg', 0.7);
+	      document.getElementById('image').value = base64;
+	      const preview = document.getElementById('preview');
+	      preview.src = base64;
+	      preview.style.display = 'inline-block';
+	    };
+	    img.src = e.target.result;
 	  };
 	  reader.readAsDataURL(file);
-	}
+	}}
  
 	function previewImage() {
 	  if (image.value) {
