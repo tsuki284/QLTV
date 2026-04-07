@@ -662,7 +662,14 @@ h1 {
 	  saveBtn.innerText = "Thêm";
 	}
  
-	loadBooks();
+	window.addEventListener('DOMContentLoaded', () => {
+	  if (sessionStorage.getItem('token')) {
+	    document.getElementById('loginPage').style.display = 'none';
+	    loadBooks();
+	  } else {
+	    document.getElementById('loginPage').style.display = 'flex';
+	  }
+	});
 </script>
  
 <script>
