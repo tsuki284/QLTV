@@ -616,7 +616,7 @@ h1 {
 	    img.src = e.target.result;
 	  };
 	  reader.readAsDataURL(file);
-	}}
+	}
  
 	function previewImage() {
 	  if (image.value) {
@@ -684,7 +684,7 @@ h1 {
 	}
  
 	window.addEventListener('DOMContentLoaded', () => {
-	  if (sessionStorage.getItem('token')) {
+	  if (localStorage.getItem('token')) {
 	    document.getElementById('loginPage').style.display = 'none';
 	    loadBooks();
 	  } else {
@@ -704,6 +704,9 @@ h1 {
     ctx.arc(Math.random() * c.width, Math.random() * c.height, Math.random() * 1.5, 0, Math.PI * 2);
     ctx.fill();
   }
+  window.addEventListener('beforeunload', () => {
+    localStorage.removeItem('token');
+  });
 </script>
  
 </body>
